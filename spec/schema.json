@@ -1,0 +1,2098 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agenticinsuranceprotocol.org/schemas/0.1/schema.json",
+  "title": "Agentic Insurance Protocol (AIP), draft 0.1",
+  "description": "Generated from schema.ts and registry/src/schema.ts. Do not edit by hand.",
+  "definitions": {
+    "AipDocument": {
+      "type": "object",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "description": "The domain that serves this document."
+        },
+        "mcp_url": {
+          "$ref": "#/definitions/Url",
+          "description": "MCP endpoint of the server."
+        },
+        "aip": {
+          "$ref": "#/definitions/AipSettings"
+        }
+      },
+      "required": [
+        "domain",
+        "mcp_url",
+        "aip"
+      ],
+      "description": "The AIP document of a seller, at `https://{domain}/.well-known/aip.json`. It leads from a domain to its MCP server. The seller MUST serve it from that host, with no redirect to another host, so that the document proves that the seller controls the domain."
+    },
+    "AipError": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/AipErrorCode"
+        },
+        "message": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FieldIssue"
+          }
+        },
+        "retryable": {
+          "type": "boolean",
+          "description": "True when the same call can succeed later with no change, as for `rate_limited` and `unavailable`."
+        },
+        "retry_after_seconds": {
+          "type": "number",
+          "description": "When the agent SHOULD retry, when `retryable` is true."
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "retryable"
+      ],
+      "description": "Error returned in an MCP tool result with `isError: true`, in `structuredContent.error`, with the same JSON as text in `content`."
+    },
+    "AipErrorCode": {
+      "type": "string",
+      "enum": [
+        "invalid_params",
+        "rate_limited",
+        "unavailable",
+        "not_supported",
+        "not_licensed",
+        "product_not_found",
+        "answers_invalid",
+        "offer_not_found",
+        "offer_expired",
+        "application_not_found"
+      ]
+    },
+    "AipSettings": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Protocol version the server implements, \"major.minor\", for example \"0.1\". Until 1.0, a client MUST treat a different minor version as a different protocol."
+        },
+        "conformance_level": {
+          "$ref": "#/definitions/ConformanceLevel"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProductLine"
+          },
+          "description": "Product lines the server can quote."
+        },
+        "countries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CountryCode"
+          },
+          "description": "Countries where the server's products are sold."
+        }
+      },
+      "required": [
+        "version",
+        "conformance_level",
+        "lines",
+        "countries"
+      ],
+      "description": "Settings object of the extension. A server puts it under `capabilities.extensions[\"org.agenticinsuranceprotocol/aip\"]` in its MCP `server/discover` response, and in its `AipDocument`."
+    },
+    "AnswerOrigin": {
+      "type": "string",
+      "enum": [
+        "customer",
+        "agent",
+        "third_party"
+      ],
+      "description": "Who produced the value of an answer."
+    },
+    "AnswerSource": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "origin": {
+              "type": "string",
+              "const": "customer"
+            },
+            "validated_by_customer": {
+              "type": "boolean",
+              "const": true
+            }
+          },
+          "required": [
+            "origin",
+            "validated_by_customer"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "origin": {
+              "type": "string",
+              "const": "agent"
+            },
+            "validated_by_customer": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "origin",
+            "validated_by_customer"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "origin": {
+              "type": "string",
+              "const": "third_party"
+            },
+            "validated_by_customer": {
+              "type": "boolean"
+            },
+            "source_name": {
+              "type": "string",
+              "description": "The third party, by its kind and country, for example \"vehicle register (FR)\"."
+            }
+          },
+          "required": [
+            "origin",
+            "validated_by_customer",
+            "source_name"
+          ]
+        }
+      ],
+      "description": "Where one answer comes from. `validated_by_customer` is true when the customer confirmed this value before the agent sent it. It is always true when the customer gave the value. An agent MUST NOT set `validated_by_customer` to true when the customer did not validate that answer."
+    },
+    "AnswerSources": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/AnswerSource"
+      },
+      "description": "The source of each answer, keyed like `answers`. An agent MUST give a source for each answer, and no source for a key that has no answer. Otherwise the server returns `answers_invalid`."
+    },
+    "Answers": {
+      "type": "object",
+      "additionalProperties": {},
+      "description": "Answers keyed by property name in `answers_schema`."
+    },
+    "AnswersSchema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "object"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "properties"
+      ],
+      "additionalProperties": {},
+      "description": "A JSON Schema (2020-12) object that describes the questions of a product. Each property is one question. Each property SHOULD have a `description` in plain words, so that the agent can ask the question.\n\nA question MUST NOT ask for an identity number, a bank account or card number, a tax number, health data of a person or a password. The seller asks for them on its own page: the approval page of `submit_application`, or the `handoff_url` of an offer."
+    },
+    "ApplicationKey": {
+      "type": "string",
+      "description": "The key to read an application with `get_operation`. The server returns it only in the result of `submit_application`. It MUST hold at least 128 bits of randomness. It is not in the approval page, so the agent keeps it to itself.",
+      "minLength": 22
+    },
+    "ApplicationState": {
+      "type": "string",
+      "enum": [
+        "waiting",
+        "approved",
+        "refused",
+        "expired"
+      ],
+      "description": "Where an application is."
+    },
+    "ConformanceLevel": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3
+      ],
+      "description": "Conformance level that a seller declares.\n\n- 1 Inform: `get_distributor`, `list_products`\n- 2 Quote: level 1, plus `quote`\n- 3 Subscribe: level 2, plus `submit_application` and `get_operation`\n\nA server that declares a level MUST implement every tool of that level and of the levels below it."
+    },
+    "CountryCode": {
+      "type": "string",
+      "description": "ISO 3166-1 alpha-2 country code, upper case.",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "CoverLimit": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Stable key, for example \"vet_costs_per_year\"."
+        },
+        "label": {
+          "type": "string"
+        },
+        "limit": {
+          "$ref": "#/definitions/Money"
+        },
+        "reimbursement_rate": {
+          "type": "number",
+          "description": "Share of a claim paid back, from 0 to 1. Used by pet and health cover."
+        }
+      },
+      "required": [
+        "key",
+        "label"
+      ]
+    },
+    "CoverSummary": {
+      "type": "object",
+      "properties": {
+        "included": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Covers included, as short labels."
+        },
+        "limits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CoverLimit"
+          }
+        },
+        "excess": {
+          "$ref": "#/definitions/Money"
+        },
+        "excess_basis": {
+          "$ref": "#/definitions/ExcessBasis",
+          "description": "What the excess applies to. Required when `excess` is above zero."
+        },
+        "main_exclusions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Main exclusions. The full list is in the documents."
+        },
+        "waiting_periods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WaitingPeriod"
+          },
+          "description": "The waiting period of each cover. Each `applies_to` MUST be a label of `included`. Give 0 days for a cover that starts at once, so that the wait of an illness does not read as the wait of an accident."
+        }
+      },
+      "required": [
+        "included"
+      ]
+    },
+    "CurrencyCode": {
+      "type": "string",
+      "description": "ISO 4217 currency code.",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "DateString": {
+      "type": "string",
+      "description": "Calendar date, ISO 8601.",
+      "format": "date"
+    },
+    "DateTimeString": {
+      "type": "string",
+      "description": "Date and time with offset, ISO 8601.",
+      "format": "date-time"
+    },
+    "Decimal": {
+      "type": "string",
+      "description": "A decimal number as a string, so that no value is lost to floating point, for example \"12.90\".",
+      "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+    },
+    "DistributorRole": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ProviderRole"
+        },
+        {
+          "type": "string",
+          "const": "broker"
+        },
+        {
+          "type": "string",
+          "const": "agent"
+        },
+        {
+          "type": "string",
+          "const": "mga"
+        },
+        {
+          "type": "string",
+          "const": "comparator"
+        }
+      ],
+      "description": "Role of a party in the distribution chain. The provider roles are in `ProviderRole`."
+    },
+    "DocumentType": {
+      "type": "string",
+      "enum": [
+        "pre_contract_information",
+        "terms_of_business",
+        "other",
+        "ipid",
+        "general_conditions",
+        "demands_and_needs"
+      ],
+      "description": "Kind of document."
+    },
+    "DomainLink": {
+      "type": "string",
+      "enum": [
+        "register",
+        "confirmed",
+        "claimed",
+        "not_linked"
+      ],
+      "description": "How the registry tied the domain to the entries. Only \"register\" and \"confirmed\" support \"licensed\"."
+    },
+    "DomainName": {
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$",
+      "description": "Host name, lower case, with no scheme, port or path, for example \"pets.example.com\"."
+    },
+    "ExcessBasis": {
+      "type": "string",
+      "enum": [
+        "per_claim",
+        "per_year",
+        "per_condition"
+      ],
+      "description": "What one excess applies to."
+    },
+    "Fee": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Stable key, for example \"policy_fee\"."
+        },
+        "label": {
+          "type": "string"
+        },
+        "amount": {
+          "$ref": "#/definitions/Money"
+        },
+        "period": {
+          "$ref": "#/definitions/PremiumPeriod",
+          "description": "How often the customer pays it. `single` for a fee paid once."
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "amount",
+        "period"
+      ],
+      "description": "A fee that the customer pays on top of the premium, for example a policy fee or a broker fee."
+    },
+    "FieldIssue": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "issue": {
+          "type": "string",
+          "enum": [
+            "missing",
+            "invalid",
+            "not_accepted"
+          ]
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "issue"
+      ]
+    },
+    "Geography": {
+      "type": "object",
+      "properties": {
+        "countries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CountryCode"
+          },
+          "description": "Countries the product covers. At least one.",
+          "minItems": 1
+        },
+        "subdivisions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubdivisionCode"
+          },
+          "description": "Subdivisions the product covers, for example US states. Each one MUST belong to a country in `countries`. The product covers the whole of each country that has no subdivision in this list."
+        }
+      },
+      "required": [
+        "countries"
+      ],
+      "description": "Where the insured person lives, or where the insured good is."
+    },
+    "GetCountryRulesParams": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "$ref": "#/definitions/CountryCode"
+        },
+        "subdivision": {
+          "description": "Adds the file of this subdivision, when one exists.",
+          "$ref": "#/definitions/SubdivisionCode"
+        },
+        "line": {
+          "description": "Adds the file of this line, when one exists.",
+          "$ref": "#/definitions/ProductLine"
+        }
+      },
+      "required": [
+        "country"
+      ],
+      "additionalProperties": false,
+      "description": "Params of `get_country_rules`."
+    },
+    "GetCountryRulesResult": {
+      "type": "object",
+      "properties": {
+        "files": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RulesFile"
+          }
+        }
+      },
+      "required": [
+        "files"
+      ],
+      "description": "Result of `get_country_rules`: the file of the country first. Follow every file."
+    },
+    "GetDistributorParams": {
+      "type": "object",
+      "description": "Params of `get_distributor`. No params."
+    },
+    "GetDistributorResult": {
+      "type": "object",
+      "properties": {
+        "legal_name": {
+          "type": "string"
+        },
+        "trading_name": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain the seller controls. It MUST match the server's own domain."
+        },
+        "lei": {
+          "$ref": "#/definitions/Lei",
+          "description": "Legal Entity Identifier, when the seller has one. The registry uses it to match one company across registers."
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DistributorRole"
+          }
+        },
+        "licences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Licence"
+          },
+          "description": "Every licence the seller relies on to sell the listed products."
+        },
+        "countries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CountryCode"
+          }
+        },
+        "complaints_url": {
+          "$ref": "#/definitions/Url",
+          "description": "Where a customer can complain. Required by most regulators."
+        },
+        "aip": {
+          "$ref": "#/definitions/AipSettings",
+          "description": "Settings the server declares for AIP."
+        }
+      },
+      "required": [
+        "legal_name",
+        "domain",
+        "roles",
+        "licences",
+        "countries",
+        "aip"
+      ]
+    },
+    "GetOperationParams": {
+      "type": "object",
+      "properties": {
+        "application_id": {
+          "type": "string"
+        },
+        "application_key": {
+          "$ref": "#/definitions/ApplicationKey"
+        }
+      },
+      "required": [
+        "application_id",
+        "application_key"
+      ],
+      "description": "Params of `get_operation`."
+    },
+    "GetOperationResult": {
+      "type": "object",
+      "properties": {
+        "application_id": {
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/definitions/ApplicationState"
+        }
+      },
+      "required": [
+        "application_id",
+        "state"
+      ],
+      "description": "Result of `get_operation`. When the `application_key` is not the key of the application, the server returns `application_not_found`."
+    },
+    "InsuranceDocument": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/DocumentType"
+        },
+        "title": {
+          "type": "string"
+        },
+        "url": {
+          "$ref": "#/definitions/Url"
+        },
+        "required_before_commitment": {
+          "type": "boolean",
+          "description": "True when the law requires that the customer receives this document before they commit, for example the IPID."
+        }
+      },
+      "required": [
+        "type",
+        "title",
+        "url",
+        "required_before_commitment"
+      ],
+      "description": "A document of a product or of an offer. `list_products` gives the documents of each product in `Product.documents`, and `quote` the documents of each offer in `Offer.documents`."
+    },
+    "InsuredFamily": {
+      "type": "string",
+      "description": "Family of what a product insures: a kind of person, or a kind of good. Servers SHOULD use a value of `KnownInsuredFamily`. Other values MUST be lower case with underscores.",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "InsuredType": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "$ref": "#/definitions/InsuredFamily"
+        },
+        "kinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Kinds that the product covers, for example \"cat\" and \"dog\". Omit when it covers every kind."
+        }
+      },
+      "required": [
+        "family"
+      ],
+      "description": "A family of insured, and the kinds of it that a product covers."
+    },
+    "KnownInsuredFamily": {
+      "type": "string",
+      "enum": [
+        "person",
+        "organisation",
+        "pet",
+        "dwelling",
+        "contents",
+        "vehicle"
+      ],
+      "description": "Families that the known product lines need."
+    },
+    "KnownNoOfferReason": {
+      "type": "string",
+      "enum": [
+        "outside_underwriting_scope",
+        "risk_not_accepted",
+        "age_not_accepted",
+        "breed_not_accepted",
+        "claims_history_not_accepted"
+      ],
+      "description": "Common reason codes. `outside_underwriting_scope` means that the risk is outside the product's underwriting scope: its geography, its insured types or its conditions. A quote for a risk outside the structured part MUST get this reason."
+    },
+    "KnownProductLine": {
+      "type": "string",
+      "enum": [
+        "pet",
+        "home",
+        "renters",
+        "motor",
+        "travel",
+        "health",
+        "life",
+        "funeral",
+        "borrower_insurance",
+        "professional_liability",
+        "general_liability",
+        "business_owners_policy",
+        "workers_compensation"
+      ],
+      "description": "Common product lines."
+    },
+    "LanguageTag": {
+      "type": "string",
+      "description": "BCP 47 language tag, for example `fr` or `en-GB`.",
+      "pattern": "^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$"
+    },
+    "Lei": {
+      "type": "string",
+      "description": "Legal Entity Identifier (ISO 17442): 18 letters or digits, then 2 check digits.",
+      "pattern": "^[A-Z0-9]{18}[0-9]{2}$"
+    },
+    "Licence": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "$ref": "#/definitions/CountryCode"
+        },
+        "regulator": {
+          "type": "string",
+          "description": "Supervising authority, for example \"ACPR\", \"FCA\", or a US state insurance department."
+        },
+        "register": {
+          "type": "string",
+          "description": "Name of the public register, for example \"ORIAS\", \"REGAFI\", \"FCA Register\", \"NIPR\"."
+        },
+        "identifier_type": {
+          "$ref": "#/definitions/RegisterIdentifierType"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/DistributorRole"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Register categories, for example ORIAS \"COA\" (insurance broker) or \"AGA\" (tied insurance agent)."
+        },
+        "subdivisions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubdivisionCode"
+          },
+          "description": "Subdivisions where the licence applies, for example US states as ISO 3166-2 codes (\"US-CA\"). Omit when the licence covers the whole country."
+        },
+        "verification_url": {
+          "$ref": "#/definitions/Url",
+          "description": "Public page where anyone can check the entry."
+        }
+      },
+      "required": [
+        "country",
+        "regulator",
+        "register",
+        "identifier_type",
+        "identifier",
+        "role"
+      ],
+      "description": "One entry in a public register that gives the right to sell a product, or to carry its risk."
+    },
+    "LicenceCheck": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "$ref": "#/definitions/CountryCode"
+        },
+        "regulator": {
+          "type": "string"
+        },
+        "register": {
+          "type": "string"
+        },
+        "identifier_type": {
+          "$ref": "#/definitions/RegisterIdentifierType"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "role": {
+          "description": "Role that the entry gives. Omit when the status is \"not_found\".",
+          "$ref": "#/definitions/DistributorRole"
+        },
+        "status": {
+          "$ref": "#/definitions/LicenceStatus"
+        },
+        "register_status": {
+          "description": "The status in the words of the register, for example \"Inscrit\".",
+          "type": "string"
+        },
+        "categories": {
+          "description": "Register categories, for example ORIAS \"COA\".",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lines": {
+          "description": "Lines that the categories cover. Omit when they cover every line.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProductLine"
+          }
+        },
+        "subdivisions": {
+          "description": "Subdivisions where the entry applies. Omit when it covers the whole country.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubdivisionCode"
+          }
+        },
+        "passports": {
+          "description": "Other countries where the entry may operate (EU and EEA).",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CountryCode"
+          }
+        },
+        "name_in_register": {
+          "type": "string"
+        },
+        "valid_until": {
+          "$ref": "#/definitions/DateString"
+        },
+        "access": {
+          "$ref": "#/definitions/SourceAccess"
+        },
+        "source_date": {
+          "description": "Date of the data in the source, when it is older than the read.",
+          "$ref": "#/definitions/DateString"
+        },
+        "checked_at": {
+          "description": "When the registry read this entry.",
+          "$ref": "#/definitions/DateTimeString"
+        },
+        "source_url": {
+          "description": "Public page where anyone can check the entry.",
+          "$ref": "#/definitions/Url"
+        }
+      },
+      "required": [
+        "country",
+        "regulator",
+        "register",
+        "identifier_type",
+        "identifier",
+        "status",
+        "access",
+        "checked_at",
+        "source_url"
+      ],
+      "description": "The result of reading one entry in one public register."
+    },
+    "LicenceStatus": {
+      "type": "string",
+      "enum": [
+        "active",
+        "pending",
+        "lapsed",
+        "suspended",
+        "revoked",
+        "not_found",
+        "name_mismatch"
+      ],
+      "description": "Status of one register entry, as the registry reads it."
+    },
+    "LicenceVerdict": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "verdict": {
+              "type": "string",
+              "const": "licensed"
+            },
+            "message": {
+              "type": "string",
+              "description": "Plain-language explanation that the AI agent can pass to the customer."
+            }
+          },
+          "required": [
+            "verdict",
+            "message"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "verdict": {
+              "type": "string",
+              "const": "not_licensed"
+            },
+            "reason": {
+              "$ref": "#/definitions/NotLicensedReason"
+            },
+            "message": {
+              "type": "string",
+              "description": "Plain-language explanation that the AI agent can pass to the customer."
+            }
+          },
+          "required": [
+            "verdict",
+            "reason",
+            "message"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "verdict": {
+              "type": "string",
+              "const": "unknown"
+            },
+            "reason": {
+              "$ref": "#/definitions/UnknownReason"
+            },
+            "message": {
+              "type": "string",
+              "description": "Plain-language explanation that the AI agent can pass to the customer."
+            }
+          },
+          "required": [
+            "verdict",
+            "reason",
+            "message"
+          ]
+        }
+      ]
+    },
+    "ListProductsParams": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "$ref": "#/definitions/CountryCode"
+        },
+        "subdivision": {
+          "$ref": "#/definitions/SubdivisionCode",
+          "description": "Products that cover this subdivision."
+        },
+        "line": {
+          "$ref": "#/definitions/ProductLine"
+        },
+        "insured_family": {
+          "$ref": "#/definitions/InsuredFamily",
+          "description": "Products that insure this family."
+        },
+        "insured_kind": {
+          "type": "string",
+          "description": "Products that insure this kind of `insured_family`, for example \"cat\". A product matches when its insured type of that family lists the kind, or lists no kinds. Give it with `insured_family`."
+        },
+        "language": {
+          "$ref": "#/definitions/LanguageTag",
+          "description": "Language of the text in the result: names, summaries, conditions and documents."
+        },
+        "cursor": {
+          "type": "string"
+        }
+      },
+      "description": "Params of `list_products`. Each filter is optional. The server MUST return only the products whose line and underwriting scope match every filter given. With `country`, `subdivision`, `insured_family` and `insured_kind`, the filters cover the whole structured part of the scope, so the agent has only the `conditions` left to check."
+    },
+    "ListProductsResult": {
+      "type": "object",
+      "properties": {
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Product"
+          }
+        },
+        "next_cursor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "products"
+      ]
+    },
+    "ListedDistributor": {
+      "type": "object",
+      "properties": {
+        "legal_name": {
+          "type": "string"
+        },
+        "trading_name": {
+          "type": "string"
+        },
+        "lei": {
+          "$ref": "#/definitions/Lei"
+        },
+        "domain": {
+          "$ref": "#/definitions/DomainName"
+        },
+        "mcp_url": {
+          "description": "MCP endpoint of the server.",
+          "$ref": "#/definitions/Url"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DistributorRole"
+          }
+        },
+        "conformance_level": {
+          "$ref": "#/definitions/ConformanceLevel"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProductLine"
+          }
+        },
+        "countries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CountryCode"
+          }
+        },
+        "subdivisions": {
+          "description": "Subdivisions where the server holds a licence. Omit when its licence covers the whole country.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubdivisionCode"
+          }
+        },
+        "insured_families": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/InsuredFamily"
+          }
+        },
+        "complaints_url": {
+          "$ref": "#/definitions/Url"
+        },
+        "licence_check": {
+          "description": "The licence check of the server for the market of the search. Its verdict is \"licensed\".",
+          "$ref": "#/definitions/VerifyLicenceResult"
+        },
+        "listed_since": {
+          "$ref": "#/definitions/DateString"
+        }
+      },
+      "required": [
+        "legal_name",
+        "domain",
+        "mcp_url",
+        "roles",
+        "conformance_level",
+        "lines",
+        "countries",
+        "licence_check",
+        "listed_since"
+      ],
+      "description": "A server that the registry lists."
+    },
+    "Money": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "$ref": "#/definitions/Decimal"
+        },
+        "currency": {
+          "$ref": "#/definitions/CurrencyCode"
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ]
+    },
+    "NoOffer": {
+      "type": "object",
+      "properties": {
+        "reason_code": {
+          "$ref": "#/definitions/NoOfferReason"
+        },
+        "message": {
+          "type": "string",
+          "description": "Plain-language explanation the agent can pass to the customer."
+        }
+      },
+      "required": [
+        "reason_code",
+        "message"
+      ],
+      "description": "Why no offer is possible."
+    },
+    "NoOfferReason": {
+      "type": "string",
+      "description": "Stable reason why no offer is possible. Servers SHOULD use a value of `KnownNoOfferReason`. Other values MUST be lower case with underscores.",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "NotLicensedReason": {
+      "type": "string",
+      "enum": [
+        "no_entry",
+        "licence_not_active",
+        "name_mismatch",
+        "role_not_covered",
+        "subdivision_not_covered",
+        "line_not_covered"
+      ]
+    },
+    "Offer": {
+      "type": "object",
+      "properties": {
+        "offer_id": {
+          "type": "string"
+        },
+        "product_id": {
+          "type": "string"
+        },
+        "tier": {
+          "type": "string",
+          "description": "The `key` of the tier of the product that this offer prices. The cover of its pricing is the cover of that tier for this customer."
+        },
+        "provider": {
+          "$ref": "#/definitions/ProviderRef"
+        },
+        "pricing": {
+          "$ref": "#/definitions/Pricing",
+          "description": "The price and the cover. A server SHOULD give `cover.excess`, `cover.limits` and `fees`. An empty `limits` means that the cover has no limit."
+        },
+        "valid_until": {
+          "$ref": "#/definitions/DateTimeString",
+          "description": "Last moment the customer can apply for the offer."
+        },
+        "handoff_url": {
+          "$ref": "#/definitions/Url",
+          "description": "Page where the customer continues with this exact offer on the seller's site. A server at level 2 MUST give it, because it takes no application. It MUST be on the domain of the seller or of the provider, and MUST NOT contain personal data."
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/InsuranceDocument"
+          },
+          "description": "The documents of this offer. A server SHOULD list every document that the customer must receive before they commit."
+        }
+      },
+      "required": [
+        "offer_id",
+        "product_id",
+        "tier",
+        "provider",
+        "pricing",
+        "valid_until"
+      ],
+      "description": "One priced offer. A seller can return several offers: one per tier, per provider, or per duration. Each offer prices one tier of its product. Its price can change after the insurer's checks. The firm price is the one that the approval page shows.\n\nWhen a server implements `quote`, an agent MUST take the price, the cover, the limits and the excess that it shows the customer from the offer, and MUST NOT take them from a page made for people."
+    },
+    "Party": {
+      "type": "object",
+      "properties": {
+        "party_ref": {
+          "type": "string",
+          "description": "Local reference, unique in one application."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "person",
+            "organisation"
+          ]
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PartyRole"
+          }
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "relationship_to_subscriber": {
+          "type": "string",
+          "description": "Relationship to the subscriber, for example \"self\", \"spouse\", \"child\", \"employee\"."
+        },
+        "date_of_birth": {
+          "$ref": "#/definitions/DateString"
+        },
+        "country_of_residence": {
+          "$ref": "#/definitions/CountryCode"
+        }
+      },
+      "required": [
+        "party_ref",
+        "kind",
+        "roles",
+        "display_name"
+      ],
+      "description": "A person or organisation in the application. Data in a party MUST be limited to what the product needs. Identity numbers MUST NOT be here."
+    },
+    "PartyRole": {
+      "type": "string",
+      "enum": [
+        "subscriber",
+        "payer",
+        "insured",
+        "beneficiary"
+      ],
+      "description": "Role of a party in the application."
+    },
+    "Premium": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "$ref": "#/definitions/Money"
+        },
+        "period": {
+          "$ref": "#/definitions/PremiumPeriod"
+        },
+        "taxes_included": {
+          "type": "boolean",
+          "description": "True when taxes and mandatory levies are in `amount`."
+        }
+      },
+      "required": [
+        "amount",
+        "period",
+        "taxes_included"
+      ]
+    },
+    "PremiumPeriod": {
+      "type": "string",
+      "enum": [
+        "month",
+        "quarter",
+        "half_year",
+        "year",
+        "single"
+      ]
+    },
+    "Pricing": {
+      "type": "object",
+      "properties": {
+        "premium": {
+          "$ref": "#/definitions/Premium"
+        },
+        "fees": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Fee"
+          },
+          "description": "Fees on top of the premium. An empty list means that the customer pays no fee."
+        },
+        "cover": {
+          "$ref": "#/definitions/CoverSummary"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProductOption"
+          },
+          "description": "The options in this price, from the `options` of the quote."
+        }
+      },
+      "required": [
+        "premium",
+        "cover"
+      ],
+      "description": "The price of an offer, and the cover it buys."
+    },
+    "Product": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "line": {
+          "$ref": "#/definitions/ProductLine"
+        },
+        "provider": {
+          "$ref": "#/definitions/ProviderRef",
+          "description": "Provider of the product, when it is not the seller."
+        },
+        "underwriting_scope": {
+          "$ref": "#/definitions/UnderwritingScope",
+          "description": "The risks the product can cover. A product MUST publish it."
+        },
+        "summary": {
+          "type": "string"
+        },
+        "tiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProductTier"
+          },
+          "description": "The tiers of the product, each with its cover and no price, for example \"Bronze\", \"Silver\" and \"Gold\". A product with one level of cover has one tier. `quote` gives one offer for each tier that can cover the customer.",
+          "minItems": 1
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProductOption"
+          },
+          "description": "Options the customer can add to a tier (optional covers, extra services)."
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/InsuranceDocument"
+          },
+          "description": "The documents of the product, such as the IPID and the general conditions."
+        }
+      },
+      "required": [
+        "product_id",
+        "name",
+        "line",
+        "underwriting_scope",
+        "summary",
+        "tiers",
+        "documents"
+      ]
+    },
+    "ProductLine": {
+      "type": "string",
+      "description": "Product line. Servers SHOULD use a value of `KnownProductLine`. Other values MUST be lower case with underscores.",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "ProductOption": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "price": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Premium"
+            },
+            {
+              "$ref": "#/definitions/Money"
+            }
+          ],
+          "description": "Cost of the option, in the same form as the main price."
+        }
+      },
+      "required": [
+        "key",
+        "label"
+      ],
+      "description": "An option the customer can add (optional cover, extra service)."
+    },
+    "ProductTier": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Stable key, unique in the product, for example \"gold\". `Offer.tier` gives it."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the tier, for example \"Gold\", \"Tous risques\" or \"Band B\"."
+        },
+        "summary": {
+          "type": "string",
+          "description": "What the tier is for, in plain words."
+        },
+        "cover": {
+          "$ref": "#/definitions/CoverSummary"
+        }
+      },
+      "required": [
+        "key",
+        "name",
+        "cover"
+      ],
+      "description": "One level of cover of a product. The price comes only from `quote`, because it depends on the customer."
+    },
+    "ProviderRef": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "legal_name": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/ProviderRole"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain the provider controls, so that an agent can find it in the registry."
+        },
+        "lei": {
+          "$ref": "#/definitions/Lei",
+          "description": "Legal Entity Identifier, when the provider has one."
+        },
+        "licences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Licence"
+          },
+          "description": "The register entries that allow the provider to carry the risk, for example its authorisation as an insurer. At least one.",
+          "minItems": 1
+        }
+      },
+      "required": [
+        "name",
+        "role",
+        "licences"
+      ],
+      "description": "The party that carries the risk."
+    },
+    "ProviderRole": {
+      "type": "string",
+      "const": "insurer",
+      "description": "Role of the party that carries the risk."
+    },
+    "QuoteComplete": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "const": "complete"
+        },
+        "offers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Offer"
+          }
+        },
+        "no_offer": {
+          "$ref": "#/definitions/NoOffer",
+          "description": "Required when `offers` is empty."
+        }
+      },
+      "required": [
+        "status",
+        "offers"
+      ],
+      "description": "A quote with its priced offers, or with the reason why there is none."
+    },
+    "QuoteNeedsInput": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "const": "needs_input"
+        },
+        "answers_schema": {
+          "$ref": "#/definitions/AnswersSchema",
+          "description": "The questions of the product. The agent asks the missing ones from it."
+        },
+        "missing_fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FieldIssue"
+          },
+          "description": "Properties of `answers_schema` that are missing, not valid or not accepted."
+        }
+      },
+      "required": [
+        "status",
+        "answers_schema",
+        "missing_fields"
+      ],
+      "description": "The questions of the product, and the answers that are still missing or wrong."
+    },
+    "QuoteParams": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "type": "string"
+        },
+        "answers": {
+          "$ref": "#/definitions/Answers",
+          "description": "The answers that the agent has. Empty in a first call that has none."
+        },
+        "answer_sources": {
+          "$ref": "#/definitions/AnswerSources",
+          "description": "Where each answer comes from, keyed like `answers`."
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Options the customer wants priced, by key (optional covers, extra services)."
+        },
+        "language": {
+          "$ref": "#/definitions/LanguageTag"
+        }
+      },
+      "required": [
+        "product_id",
+        "answers",
+        "answer_sources"
+      ],
+      "description": "Params of `quote`.\n\nThe agent sends the answers that it has, even none. When answers are missing, the server returns `needs_input` with the questions of the product and the missing fields. The agent asks the customer, and calls `quote` again with all the answers. This one loop replaces the tools that give the questions, and the multi-step flow tools (`action`, `stateUpdates`, `sessionId`) that most servers use.\n\nThe server keeps the answers and their sources with each offer, until its `valid_until`. `submit_application` takes them from the offer, so the agent does not send them again."
+    },
+    "QuoteResult": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/QuoteComplete"
+        },
+        {
+          "$ref": "#/definitions/QuoteNeedsInput"
+        }
+      ]
+    },
+    "RegisterIdentifier": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "description": "Country of the register.",
+          "$ref": "#/definitions/CountryCode"
+        },
+        "identifier_type": {
+          "$ref": "#/definitions/RegisterIdentifierType"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "register": {
+          "description": "Name of the register. Give it when `identifier_type` is \"other\".",
+          "type": "string"
+        }
+      },
+      "required": [
+        "country",
+        "identifier_type",
+        "identifier"
+      ],
+      "additionalProperties": false,
+      "description": "An entry in a public register."
+    },
+    "RegisterIdentifierType": {
+      "type": "string",
+      "enum": [
+        "orias_number",
+        "siren",
+        "fca_frn",
+        "npn",
+        "naic_cocode",
+        "lei",
+        "other"
+      ],
+      "description": "Kind of public register identifier."
+    },
+    "RegisterSource": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "$ref": "#/definitions/CountryCode"
+        },
+        "subdivisions": {
+          "description": "Subdivisions that this source covers. Omit when it covers the whole country.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubdivisionCode"
+          }
+        },
+        "register": {
+          "type": "string",
+          "description": "Name of the register, for example \"ORIAS\"."
+        },
+        "regulator": {
+          "type": "string"
+        },
+        "covers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "intermediaries",
+              "insurers"
+            ]
+          }
+        },
+        "identifier_type": {
+          "$ref": "#/definitions/RegisterIdentifierType"
+        },
+        "access": {
+          "$ref": "#/definitions/SourceAccess"
+        },
+        "url": {
+          "description": "Public home page of the register.",
+          "$ref": "#/definitions/Url"
+        }
+      },
+      "required": [
+        "country",
+        "register",
+        "regulator",
+        "covers",
+        "identifier_type",
+        "access",
+        "url"
+      ],
+      "description": "A public register that the registry reads."
+    },
+    "RegistryError": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/RegistryErrorCode"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "description": "Error of a registry tool, in `structuredContent.error` of a result with `isError: true`."
+    },
+    "RegistryErrorCode": {
+      "type": "string",
+      "enum": [
+        "country_not_covered"
+      ]
+    },
+    "RegistrySettings": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "countries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CountryCode"
+          },
+          "description": "Countries where the registry checks licences and lists servers."
+        },
+        "rules_countries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CountryCode"
+          },
+          "description": "Countries that have a rules file."
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RegisterSource"
+          }
+        },
+        "policy_url": {
+          "description": "Page where the operator publishes how it lists servers and checks licences.",
+          "$ref": "#/definitions/Url"
+        },
+        "listing_url": {
+          "description": "Page where a distributor asks to be listed.",
+          "$ref": "#/definitions/Url"
+        }
+      },
+      "required": [
+        "version",
+        "countries",
+        "rules_countries",
+        "sources",
+        "policy_url",
+        "listing_url"
+      ],
+      "description": "Settings of the registry extension, in its MCP `server/discover` response."
+    },
+    "RulesFile": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "$ref": "#/definitions/CountryCode"
+        },
+        "subdivision": {
+          "$ref": "#/definitions/SubdivisionCode"
+        },
+        "line": {
+          "$ref": "#/definitions/ProductLine"
+        },
+        "version": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "endorsed"
+          ]
+        },
+        "endorsed_by": {
+          "type": "string"
+        },
+        "reviewed_at": {
+          "$ref": "#/definitions/DateString"
+        },
+        "effective_from": {
+          "$ref": "#/definitions/DateString"
+        },
+        "language": {
+          "$ref": "#/definitions/LanguageTag"
+        },
+        "content": {
+          "type": "string",
+          "description": "The whole file, unchanged, front matter included."
+        },
+        "url": {
+          "description": "Public HTTPS address of the same file.",
+          "$ref": "#/definitions/Url"
+        },
+        "skill_uri": {
+          "description": "URI of the same file in the AIP skill.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "country",
+        "version",
+        "owner",
+        "status",
+        "effective_from",
+        "language",
+        "content",
+        "url"
+      ],
+      "description": "One rules file of the AIP skill: Markdown with a YAML front matter that gives the same values as these fields."
+    },
+    "SearchDistributorsParams": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "description": "Country where the customer buys.",
+          "$ref": "#/definitions/CountryCode"
+        },
+        "subdivision": {
+          "description": "Subdivision where the customer buys, for example a US state.",
+          "$ref": "#/definitions/SubdivisionCode"
+        },
+        "line": {
+          "$ref": "#/definitions/ProductLine"
+        },
+        "insured_family": {
+          "$ref": "#/definitions/InsuredFamily"
+        },
+        "min_conformance_level": {
+          "description": "Return only servers of this level or above.",
+          "$ref": "#/definitions/ConformanceLevel"
+        },
+        "cursor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "country"
+      ],
+      "additionalProperties": false,
+      "description": "Params of `search_distributors`. They describe a market, never a person."
+    },
+    "SearchDistributorsResult": {
+      "type": "object",
+      "properties": {
+        "distributors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ListedDistributor"
+          }
+        },
+        "next_cursor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "distributors"
+      ],
+      "description": "Result of `search_distributors`. The order carries no meaning: never show it as a ranking."
+    },
+    "SourceAccess": {
+      "type": "string",
+      "enum": [
+        "api",
+        "bulk_file",
+        "web_page"
+      ],
+      "description": "How the registry reads a public register."
+    },
+    "SubdivisionCode": {
+      "type": "string",
+      "description": "ISO 3166-2 subdivision code, upper case, for example \"US-CA\" for California.",
+      "pattern": "^[A-Z]{2}-[A-Z0-9]{1,3}$"
+    },
+    "SubmitApplicationParams": {
+      "type": "object",
+      "properties": {
+        "offer_id": {
+          "type": "string"
+        },
+        "parties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Party"
+          }
+        },
+        "language": {
+          "$ref": "#/definitions/LanguageTag",
+          "description": "Language of the `summary` and of the approval page."
+        }
+      },
+      "required": [
+        "offer_id",
+        "parties"
+      ],
+      "description": "Params of `submit_application`. The offer comes from a complete quote. The server takes the answers, their sources and the options from that quote, so the agent does not send them again. When the customer wants to change an answer, the agent calls `quote` again, and applies for an offer of the new quote."
+    },
+    "SubmitApplicationResult": {
+      "type": "object",
+      "properties": {
+        "application_id": {
+          "type": "string"
+        },
+        "application_key": {
+          "$ref": "#/definitions/ApplicationKey",
+          "description": "The key to read the application with `get_operation`. See `ApplicationKey`."
+        },
+        "summary": {
+          "type": "string",
+          "description": "The application in plain words, so that the customer can decide from it alone: the product, the tier, the insurer and the price. It MUST give each answer and its source, and MUST ask the customer to approve only when each answer is true and complete, so that the approval is also the customer's confirmation of the answers."
+        },
+        "url": {
+          "$ref": "#/definitions/Url",
+          "description": "The seller's page where the customer approves the application, then signs and pays. Before the customer can approve, the page MUST show the firm price, each answer with its source, and a link to each document of the product and of the offer with `required_before_commitment: true`. It MUST let the customer approve or refuse.\n\nThe page MUST take an approval only from a form that the person submits on it, never from a GET request, so that a link preview cannot approve. The URL MUST be on the domain of the seller, MUST hold a token of at least 128 bits of randomness that is neither the `application_id` nor the `application_key`, and MUST NOT contain personal data."
+        },
+        "expires_at": {
+          "$ref": "#/definitions/DateTimeString",
+          "description": "Last moment the customer can approve. After it, the application is `expired`."
+        }
+      },
+      "required": [
+        "application_id",
+        "application_key",
+        "summary",
+        "url",
+        "expires_at"
+      ],
+      "description": "An application that waits for the customer. `submit_application` commits nothing. The customer approves the application on the seller's page at `url`, then signs and pays on the same site. When the client declares MCP URL-mode elicitation, the server SHOULD open the page with a URL-mode elicitation of `url`. Otherwise the agent gives the customer `url`.\n\nThe seller MUST keep what the customer approved, with the answers and their sources, the price and the documents, for the period that the law requires."
+    },
+    "ToolName": {
+      "type": "string",
+      "enum": [
+        "get_distributor",
+        "list_products",
+        "quote",
+        "submit_application",
+        "get_operation"
+      ]
+    },
+    "ToolSignatures": {
+      "type": "object",
+      "properties": {
+        "get_distributor": {
+          "type": "object",
+          "properties": {
+            "params": {
+              "$ref": "#/definitions/GetDistributorParams"
+            },
+            "result": {
+              "$ref": "#/definitions/GetDistributorResult"
+            }
+          },
+          "required": [
+            "params",
+            "result"
+          ]
+        },
+        "list_products": {
+          "type": "object",
+          "properties": {
+            "params": {
+              "$ref": "#/definitions/ListProductsParams"
+            },
+            "result": {
+              "$ref": "#/definitions/ListProductsResult"
+            }
+          },
+          "required": [
+            "params",
+            "result"
+          ]
+        },
+        "quote": {
+          "type": "object",
+          "properties": {
+            "params": {
+              "$ref": "#/definitions/QuoteParams"
+            },
+            "result": {
+              "$ref": "#/definitions/QuoteResult"
+            }
+          },
+          "required": [
+            "params",
+            "result"
+          ]
+        },
+        "submit_application": {
+          "type": "object",
+          "properties": {
+            "params": {
+              "$ref": "#/definitions/SubmitApplicationParams"
+            },
+            "result": {
+              "$ref": "#/definitions/SubmitApplicationResult"
+            }
+          },
+          "required": [
+            "params",
+            "result"
+          ]
+        },
+        "get_operation": {
+          "type": "object",
+          "properties": {
+            "params": {
+              "$ref": "#/definitions/GetOperationParams"
+            },
+            "result": {
+              "$ref": "#/definitions/GetOperationResult"
+            }
+          },
+          "required": [
+            "params",
+            "result"
+          ]
+        }
+      },
+      "required": [
+        "get_distributor",
+        "list_products",
+        "quote",
+        "submit_application",
+        "get_operation"
+      ],
+      "description": "Params and result type of each tool."
+    },
+    "UnderwritingScope": {
+      "type": "object",
+      "properties": {
+        "geography": {
+          "$ref": "#/definitions/Geography"
+        },
+        "insured": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/InsuredType"
+          },
+          "description": "What the product insures. At least one.",
+          "minItems": 1
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The conditions that a machine cannot check, in plain words, for example \"Houses built after 1950 only\" or \"Not for people over 70\". Empty when there are none. An agent SHOULD check them against what the customer said before it quotes, and ask the customer when it is not sure."
+        }
+      },
+      "required": [
+        "geography",
+        "insured",
+        "conditions"
+      ],
+      "description": "The risks a product can cover. `list_products` gives it with no customer data, so that an agent can drop a product that cannot cover the customer before it asks a question.\n\n`geography` and `insured` are the structured part. A server MUST NOT return an offer for a risk outside the structured part. An agent MUST NOT send answers to `quote` for a product whose structured part excludes the customer. `conditions` holds the rest."
+    },
+    "UnknownReason": {
+      "type": "string",
+      "enum": [
+        "country_not_covered",
+        "subdivision_required",
+        "register_unavailable",
+        "subject_not_identified",
+        "domain_not_linked"
+      ]
+    },
+    "Url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "VerifyLicenceParams": {
+      "type": "object",
+      "properties": {
+        "capacity": {
+          "type": "string",
+          "enum": [
+            "distributor",
+            "provider"
+          ],
+          "description": "\"distributor\" for a seller, \"provider\" for the party that carries the risk, for example the insurer in `Offer.provider`."
+        },
+        "subject": {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "description": "Domain of the MCP server or the website that receives the customer's answers. REQUIRED for a seller.",
+              "$ref": "#/definitions/DomainName"
+            },
+            "identifier": {
+              "description": "Register entry that the party shows, for example in the legal notice of its website.",
+              "$ref": "#/definitions/RegisterIdentifier"
+            },
+            "legal_name": {
+              "description": "Legal name that the party shows.",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "country": {
+          "description": "Country where the customer buys.",
+          "$ref": "#/definitions/CountryCode"
+        },
+        "subdivision": {
+          "description": "Subdivision where the customer buys. REQUIRED in the United States.",
+          "$ref": "#/definitions/SubdivisionCode"
+        },
+        "line": {
+          "$ref": "#/definitions/ProductLine"
+        }
+      },
+      "required": [
+        "capacity",
+        "subject",
+        "country"
+      ],
+      "additionalProperties": false,
+      "description": "Params of `verify_licence`. They name a company and a market, never a person."
+    },
+    "VerifyLicenceResult": {
+      "type": "object",
+      "properties": {
+        "check_id": {
+          "type": "string"
+        },
+        "params": {
+          "description": "The params of the call, so that the result is a complete record alone.",
+          "$ref": "#/definitions/VerifyLicenceParams"
+        },
+        "subject": {
+          "type": "object",
+          "properties": {
+            "legal_name": {
+              "type": "string"
+            },
+            "lei": {
+              "$ref": "#/definitions/Lei"
+            },
+            "domain": {
+              "$ref": "#/definitions/DomainName"
+            },
+            "domain_link": {
+              "$ref": "#/definitions/DomainLink"
+            },
+            "listed": {
+              "type": "boolean",
+              "description": "True when the registry lists the MCP server of the domain."
+            },
+            "mcp_url": {
+              "description": "MCP endpoint of the listed server.",
+              "$ref": "#/definitions/Url"
+            }
+          },
+          "required": [
+            "listed"
+          ]
+        },
+        "licences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LicenceCheck"
+          },
+          "description": "Every entry the registry read for the party."
+        },
+        "outcome": {
+          "$ref": "#/definitions/LicenceVerdict"
+        },
+        "checked_at": {
+          "$ref": "#/definitions/DateTimeString"
+        }
+      },
+      "required": [
+        "check_id",
+        "params",
+        "subject",
+        "licences",
+        "outcome",
+        "checked_at"
+      ],
+      "description": "Result of `verify_licence`. Keep it with the record of the sale."
+    },
+    "WaitingPeriod": {
+      "type": "object",
+      "properties": {
+        "applies_to": {
+          "type": "string",
+          "description": "The cover it applies to: a label of `included`, for example \"Illness\"."
+        },
+        "days": {
+          "type": "number",
+          "description": "Days after the start date. 0 when the cover starts at once."
+        }
+      },
+      "required": [
+        "applies_to",
+        "days"
+      ],
+      "description": "The days after the start date before a claim for one cover is paid."
+    }
+  }
+}

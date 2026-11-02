@@ -1,0 +1,8 @@
+{
+  "status": "complete",
+  "offers": [],
+  "no_offer": {
+    "reason_code": "age_not_accepted",
+    "message": "Example Mutual does not start cover for a dog older than 9 years."
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "capacity": "distributor",
+  "subject": {
+    "domain": "pets.example.com"
+  },
+  "country": "FR",
+  "line": "pet"
+}

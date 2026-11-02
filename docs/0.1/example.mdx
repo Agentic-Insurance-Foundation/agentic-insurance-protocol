@@ -1,0 +1,125 @@
+---
+title: "Worked example: pet insurance"
+sidebarTitle: "Worked example"
+description: "A pet insurance flow from discovery to evidence, as the JSON that each tool sends and returns."
+---
+
+import Insurance01 from "/snippets/examples/insurance-01-get_distributor.result.mdx";
+import Insurance02 from "/snippets/examples/insurance-02-list_products.params.mdx";
+import Insurance03 from "/snippets/examples/insurance-03-list_products.result.mdx";
+import Insurance04 from "/snippets/examples/insurance-04-quote.params.first.mdx";
+import Insurance05 from "/snippets/examples/insurance-05-quote.result.needs_input.mdx";
+import Insurance06 from "/snippets/examples/insurance-06-quote.params.complete.mdx";
+import Insurance07 from "/snippets/examples/insurance-07-quote.result.offers.mdx";
+import Insurance08 from "/snippets/examples/insurance-08-quote.result.no_offer.mdx";
+import Insurance09 from "/snippets/examples/insurance-09-quote.result.outside_scope.mdx";
+import Insurance10 from "/snippets/examples/insurance-10-submit_application.params.mdx";
+import Insurance11 from "/snippets/examples/insurance-11-submit_application.result.mdx";
+import Insurance12 from "/snippets/examples/insurance-12-get_operation.params.mdx";
+import Insurance13 from "/snippets/examples/insurance-13-get_operation.result.approved.mdx";
+
+A broker, Example Pets, sells the pet insurance of an insurer, Example Mutual, in France. An agent finds the product, quotes a cat called Miso for Alice, and applies for the first offer. Alice approves the application once, on Example Pets' page, where she also signs and pays. All companies, people and prices are fictional. The repository writes these files with [`scripts/examples.ts`](https://github.com/Agentic-Insurance-Foundation/agentic-insurance-protocol/blob/main/scripts/examples.ts) and checks them against the [schema](/0.1/reference) and the rules on every push.
+
+## 1. Find the distributor
+
+*get_distributor, result*
+
+The agent asks who sells and under which licence. Example Pets is a broker in the ORIAS register, and it declares level 3 for pet insurance in France.
+
+<Insurance01 />
+
+## 2. Look for a product
+
+*list_products, params*
+
+Alice lives in France and wants to insure her cat. The agent asks for the products that cover a cat in France. With the country, the family and the kind, the filters cover the whole structured part of the scope.
+
+<Insurance02 />
+
+## 3. Read the scope, the tiers and the documents
+
+*list_products, result*
+
+The product publishes its scope before any question: France only, cats and dogs, and four conditions in plain words. The agent checks the conditions against what Alice said, and asks her when it is not sure. The product names its insurer, Example Mutual, and the agent checks it in the registry before it asks any question. It has two tiers, Essentiel 70 and Essentiel 90, each with its cover and no price. The product also lists its documents. The IPID and the general conditions must reach the customer before they commit.
+
+<Insurance03 />
+
+## 4. Quote with the answers from the chat
+
+*quote, params*
+
+The agent quotes with the five answers it already has. Each answer has a source. Alice gave four of them, and the agent read the breed from her photo.
+
+<Insurance04 />
+
+## 5. Get the questions that are still open
+
+*quote, result*
+
+The server returns the questions of the product as a JSON Schema, and lists the required answers that are missing. The agent asks Alice only those, and her vet clinic's record gives the date of birth. No question asks for a bank account or an identity number: Example Pets asks for them on its own page.
+
+<Insurance05 />
+
+## 6. Quote with every answer
+
+*quote, params*
+
+The agent sends all the answers and their sources again. The date of birth comes from a third party, named in `source_name`.
+
+<Insurance06 />
+
+## 7. Compare the offers
+
+*quote, result*
+
+Two offers, one for each tier of the product, in the same shape, each with its excess, its limits, its fees and its documents. Their price can change after the insurer's checks, and the approval page shows the firm price.
+
+<Insurance07 />
+
+## 8. Get a reason when there is no offer
+
+*quote, result*
+
+For a dog born in 2015, the insurer makes no offer and gives a stable reason code.
+
+<Insurance08 />
+
+## 9. Refuse a risk outside the scope
+
+*quote, result*
+
+A cat that lives in the United Kingdom is outside the geography of the scope. An agent that follows the rules does not send this quote. The server refuses it anyway, with the reason `outside_underwriting_scope`.
+
+<Insurance09 />
+
+## 10. Apply
+
+*submit_application, params*
+
+Alice chooses Essentiel 70. The agent sends the offer and the parties. It does not send the answers again: the server takes them, with their sources, from the offer.
+
+<Insurance10 />
+
+## 11. Get the page to approve
+
+*submit_application, result*
+
+Nothing is committed yet. The summary gives the price and each answer with its source, and asks Alice to approve only if each answer is true and complete. The agent gives Alice the `url`, which holds a token of its own, and keeps the `application_key` to itself.
+
+<Insurance11 />
+
+## 12. Approve on the seller's page
+
+*get_operation, params*
+
+On Example Pets' page, Alice reads the documents, checks the answers and the firm price, and approves. Then she signs and pays on the same page. The agent reads the application with its ID and its key.
+
+<Insurance12 />
+
+## 13. Learn the outcome
+
+*get_operation, result*
+
+Alice approved. Example Pets keeps what she approved, with the answers and their sources, for the period that the law requires.
+
+<Insurance13 />

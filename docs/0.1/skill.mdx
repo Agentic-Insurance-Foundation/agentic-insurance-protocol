@@ -1,0 +1,88 @@
+---
+title: "AIP skill"
+description: "The procedure that an AI agent follows to buy insurance for a person, and the rules file of each country, open to the regulators."
+---
+
+import SkillVersion from "/snippets/generated/skill-version.mdx";
+import SkillSteps from "/snippets/generated/skill-steps.mdx";
+import SkillNever from "/snippets/generated/skill-never.mdx";
+import SkillCountries from "/snippets/generated/skill-countries.mdx";
+
+<SkillVersion />
+
+The skill `agentic-insurance-protocol` tells an AI agent how to buy insurance for a customer under the Agentic Insurance Protocol (AIP). Any assistant that loads skills in the [Agent Skills format](https://agentskills.io/specification) can install it. The skill uses the AIP registry and the MCP server of each seller, and it follows the rules of the customer's country.
+
+The skill is open source, under the Apache 2.0 licence of this repository. The AIP maintainers wrote the first draft. The goal is that the industry agrees on it, and that the regulator of each country owns the rules of its country.
+
+## Install
+
+Run this command in a terminal:
+
+```bash
+npx skills add Agentic-Insurance-Foundation/agentic-insurance-protocol --skill agentic-insurance-protocol
+```
+
+The [skills CLI](https://github.com/vercel-labs/skills) asks which AI agents get the skill: Claude Code, Codex, Cursor and many more. Add `-g` to install it for all your projects.
+
+Then connect your AI agent to the AIP registry, an MCP server. In Claude Code:
+
+```bash
+claude mcp add --transport http --scope user aip-registry https://registry.agenticinsuranceprotocol.org/mcp
+```
+
+That's it. Your AI agent loads the skill when someone asks it for insurance.
+
+You can also tell your AI agent to do the two steps itself:
+
+```text
+Install the AIP registry from docs.agenticinsuranceprotocol.org/install.md
+```
+
+When you build an AI agent, let it also call the MCP server of each seller, at the `mcp_url` that the registry gives. The customer approves each application on the seller's page.
+
+No registry with real register data runs yet. The registry above is a test registry with fictional data. The registry will also serve the skill through the MCP Skills extension, so that a host that loads skills over MCP gets it from the registry with no copy.
+
+## Who it is for
+
+- **Makers of AI assistants.** An assistant that loads the skill follows one procedure to buy insurance, and its maker can say which version it follows.
+- **Insurers and distributors.** The skill shows what an agent checks before it calls their tools, and what it keeps after.
+- **Regulators.** Each country has a folder of rules. A regulator can read in a few minutes what an agent does in its country, and it can take its folder over.
+
+## What the AI agent does
+
+The skill gives the AI agent these steps, in this order. Each tool is on the [registry](/0.1/registry) or on the [seller's server](/0.1/spec).
+
+<SkillSteps />
+
+## What the AI agent never does
+
+These rules come from the specifications, and the skill repeats them where the AI agent needs them.
+
+<SkillNever />
+
+## Your country, your rules
+
+Each country has a folder: the country file, and a file for each state or line that needs more rules. Each rule names its legal source, and stays a draft until a lawyer or the regulator reviews it. The registry serves the same files, so an AI agent follows the current version of each one.
+
+<SkillCountries />
+
+## Take over a country file
+
+A regulator, or a body that a regulator names, can own the folder of its country, or one file in it. A US state's insurance department can own the file of its state while the maintainers keep the US file. Then each agent that follows the skill applies the rules that the regulator wrote.
+
+1. The regulator contacts the AIP maintainers through an [issue](https://github.com/Agentic-Insurance-Foundation/agentic-insurance-protocol/issues/new/choose).
+2. The regulator reviews the file and changes what it wants: what the agent may say, the documents, the demands and needs, the withdrawal period, sensitive data, complaints, or extra steps for its market. A country file can make the procedure stricter. It cannot remove a rule of the AIP specification.
+3. In the front matter, `owner` becomes the regulator, `status` becomes `endorsed`, `endorsed_by` names the regulator, `reviewed_at` gives the date of the review, and `version` changes.
+4. The maintainers merge the change. The registry serves the new version, and each agent that loads the rules from the registry gets it on its next call. Agents that use the bundled copy get it with the next release of the skill.
+
+A regulator can also add a file for a state in `states/`, or for one line in `lines/`. That file adds `subdivision` or `line` to its front matter, and the registry serves it after the country file.
+
+## Checks
+
+The repository checks the format of the skill and of the test cases of the evaluation:
+
+- **SK1** SKILL.md has the name of its folder, a description that starts "Use this when", and at most 30 lines.
+- **SK2** SKILL.md points to the guidelines and to files that exist, and the guidelines name every tool of the seller and of the registry.
+- **SK3** each country folder holds `country.md`, `states/` and `lines/` only, and the front matter of each rules file matches its place and gives the version, the owner, the status, the language, the date and the sources.
+- **SK4** each rule of a rules file gives its source and its review status.
+- **SK5** each test case of the evaluation names the customer's country, its risk and the rules it tests, and each rule it names is a section of a specification or a rule of a file of the skill.

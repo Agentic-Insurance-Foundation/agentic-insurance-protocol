@@ -1,0 +1,60 @@
+---
+country: US
+version: 0.1.0
+owner: AIP maintainers
+status: draft
+language: en
+effective_from: 2026-10-24
+sources:
+  - title: NAIC Producer Licensing Model Act (#218)
+    url: https://content.naic.org/sites/default/files/model-law-218.pdf
+  - title: NAIC Privacy of Consumer Financial and Health Information Regulation (#672)
+    url: https://content.naic.org/sites/default/files/model-law-672.pdf
+  - title: NAIC Insurance Data Security Model Law (#668)
+    url: https://content.naic.org/sites/default/files/model-law-668.pdf
+  - title: Gramm-Leach-Bliley Act, 15 U.S.C. 6805
+    url: https://www.law.cornell.edu/uscode/text/15/6805
+  - title: NAIC, state insurance departments
+    url: https://content.naic.org/state-insurance-departments
+---
+
+# United States
+
+Draft. No lawyer and no regulator has reviewed this file. Each rule gives its source and its review status. Follow this file as well as the procedure of the skill.
+
+Each state regulates insurance with its own laws and its own insurance department. Most states build their laws on the NAIC model acts, and their texts differ. This file holds the points that the model acts share. The files of the states come later, in `states/`. The rules of one line are in `lines/`, for example `lines/pet.md`.
+
+## Who may sell
+
+1. A person who sells, solicits or negotiates insurance in a state must hold a producer licence of that state for the line of authority. Check the seller with `verify_licence`, the capacity "distributor", the country US and the subdivision of the customer's state, for example US-TX, before you send any answer of the customer. Source: NAIC Producer Licensing Model Act, s. 3. Not reviewed.
+2. A licence of one state does not cover a customer in another state. When the verdict is `not_licensed` with the reason `subdivision_not_covered` or `licence_not_active`, stop with this seller. Source: NAIC Producer Licensing Model Act, s. 3. Not reviewed.
+3. An insurer transacts insurance in a state only under a certificate of authority of that state. Check the insurer behind each offer in the same way, with the capacity "provider". Source: state insurance codes, for example Washington RCW 48.05.030(1). Not reviewed.
+
+## What you may say
+
+1. To solicit is to try to sell insurance, or to ask or urge a person to apply for a kind of insurance from a particular company. Only a licensed producer may do it, paid or not. Do not urge the customer to buy from a particular company, and do not recommend an offer. When the customer asks for advice, say that you cannot give it, and that a licensed producer can. Source: NAIC Producer Licensing Model Act, s. 2 and s. 3. Not reviewed.
+2. To negotiate is to confer with or advise a buyer on the benefits, terms or conditions of a particular contract, by a person who sells insurance or obtains it for buyers. Give the cover in the seller's words, from the offer and the documents, and do not add your own reading of what a term means for the customer. Send that question to the seller. Source: NAIC Producer Licensing Model Act, s. 2. Not reviewed.
+3. A person with no licence may not take a commission for selling, soliciting or negotiating insurance. Follow this skill only when you, and the company that runs you, get no commission, fee or other advantage linked to the sale. Source: NAIC Producer Licensing Model Act, s. 13. Not reviewed.
+4. Give the facts of each offer as `quote` returns them, side by side, with the same fields in the same order, so that the customer compares them alone. Do not rank the offers. Source: NAIC Producer Licensing Model Act, s. 2. Not reviewed.
+
+## Documents before commitment
+
+1. No general rule names one document before commitment for property and casualty insurance. Give the customer every document with `required_before_commitment: true`, and the policy form when the seller gives it. Source: no general rule found in the NAIC model acts for property and casualty insurance. Not reviewed.
+
+## Demands and needs
+
+1. No general rule asks the seller to record the demands and needs for property and casualty insurance. Record the customer's need in their own words anyway, in step 1 of the procedure. Source: no general rule found in the NAIC model acts for property and casualty insurance. Not reviewed.
+
+## Withdrawal
+
+1. The right to return a policy after the purchase depends on the state and on the line. Most "free look" periods cover life, health and annuities. For other lines, tell the customer what the documents of the offer say about cancellation. Source: state insurance codes. Not reviewed.
+
+## Sensitive data
+
+1. The insurance department of each state enforces the federal privacy rules against insurers. An insurer and a producer give a privacy notice, and ask for the customer's authorisation before they disclose health information about a person. Source: Gramm-Leach-Bliley Act, 15 U.S.C. 6805(a)(6); NAIC Privacy of Consumer Financial and Health Information Regulation, s. 18. Not reviewed.
+2. Never collect a Social Security number, a bank account number or health details of a person. The customer gives them on the seller's page. Source: NAIC Insurance Data Security Model Law. Not reviewed.
+
+## Complaints
+
+1. The customer first complains to the seller, at its `complaints_url`. Give the customer that address. Source: NAIC, page on how to file a complaint. Not reviewed.
+2. The customer can then file a complaint with the insurance department of their state, which investigates for free. Give the customer its name. Source: NAIC, page on how to file a complaint. Not reviewed.

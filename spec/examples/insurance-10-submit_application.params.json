@@ -1,0 +1,17 @@
+{
+  "offer_id": "of-3c81",
+  "parties": [
+    {
+      "party_ref": "p1",
+      "kind": "person",
+      "roles": [
+        "subscriber",
+        "insured",
+        "payer"
+      ],
+      "display_name": "Alice",
+      "country_of_residence": "FR"
+    }
+  ],
+  "language": "en"
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Agentic Insurance Protocol",
+  "description": "AIP: how AI agents find, price and apply for insurance with any licensed seller, under the rules of the customer's country.",
+  "colors": {
+    "primary": "#A85C2C",
+    "light": "#D08850",
+    "dark": "#A85C2C"
+  },
+  "background": {
+    "color": {
+      "light": "#FFFFFF",
+      "dark": "#0A1322"
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg",
+    "href": "https://agenticinsuranceprotocol.org"
+  },
+  "favicon": "/favicon.svg",
+  "fonts": {
+    "family": "IBM Plex Sans"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/Agentic-Insurance-Foundation/agentic-insurance-protocol"
+    }
+  },
+  "navigation": {
+    "versions": [
+      {
+        "version": "Draft 0.1",
+        "tabs": [
+          { "tab": "Introduction", "pages": ["introduction"] },
+          { "tab": "Install", "pages": ["install"] },
+          { "tab": "Specification", "pages": ["0.1/spec"] },
+          { "tab": "Registry", "pages": ["0.1/registry"] },
+          {
+            "tab": "AIP skill",
+            "pages": ["0.1/skill", { "group": "Country rules", "pages": ["0.1/skill/fr", "0.1/skill/gb", "0.1/skill/us"] }]
+          },
+          { "tab": "Evaluation", "pages": ["0.1/evaluation"] },
+          { "tab": "Reference", "pages": ["0.1/reference", "0.1/example"] }
+        ]
+      }
+    ]
+  },
+  "contextual": {
+    "options": ["copy", "view"]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/Agentic-Insurance-Foundation/agentic-insurance-protocol"
+    }
+  }
+}

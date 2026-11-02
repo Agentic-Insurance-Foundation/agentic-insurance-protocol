@@ -1,0 +1,9 @@
+{
+  "capacity": "distributor",
+  "subject": {
+    "domain": "agency.example.com"
+  },
+  "country": "US",
+  "subdivision": "US-TX",
+  "line": "pet"
+}

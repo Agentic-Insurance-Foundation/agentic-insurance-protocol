@@ -1,0 +1,46 @@
+name: New topic
+description: Propose something many implementations need that the draft doesn't cover.
+labels: ["proposal"]
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Check the open points in the [specification](https://docs.agenticinsuranceprotocol.org/0.1/spec#15-open-points) and the existing issues first. If one already covers your idea, add to it there.
+    - type: dropdown
+      id: kind
+      attributes:
+          label: Kind
+          options:
+              - New topic
+              - Change to a tool or a type
+              - Change to a rule
+      validations:
+          required: true
+    - type: textarea
+      id: problem
+      attributes:
+          label: Problem
+          description: What an agent or a distributor can't do with the draft, with a concrete example.
+      validations:
+          required: true
+    - type: dropdown
+      id: who
+      attributes:
+          label: Who needs it
+          multiple: true
+          options:
+              - Agents
+              - Distributors
+              - Customers
+      validations:
+          required: true
+    - type: textarea
+      id: proposal
+      attributes:
+          label: Proposed approach
+          description: Optional. How it could work, and the laws it must meet.
+    - type: textarea
+      id: prior-art
+      attributes:
+          label: Prior art
+          description: Optional. Existing protocols or products that solve this, and how AIP would work with them.

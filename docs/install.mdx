@@ -1,0 +1,74 @@
+---
+title: "Install AIP"
+sidebarTitle: "Install"
+description: "The install steps for an AI agent: the AIP skill and the registry to buy insurance, or the MCP server of a seller."
+---
+
+These steps are for an AI agent whose user asked it to install AIP. AIP has two parts. Do the part that your user asked for. When it is not clear, ask your user.
+
+- **Registry**: your user wants you to buy insurance for them.
+- **Seller MCP server**: your user sells insurance, and wants an MCP server for AIP.
+
+## Registry
+
+1. Install the AIP skill for all the projects of your user:
+
+   <CodeGroup>
+   ```bash npx
+   npx skills add Agentic-Insurance-Foundation/agentic-insurance-protocol --skill agentic-insurance-protocol -g -y
+   ```
+
+   ```bash bun
+   bunx skills add Agentic-Insurance-Foundation/agentic-insurance-protocol --skill agentic-insurance-protocol -g -y
+   ```
+
+   ```bash yarn
+   yarn dlx skills add Agentic-Insurance-Foundation/agentic-insurance-protocol --skill agentic-insurance-protocol -g -y
+   ```
+
+   ```bash pnpm
+   pnpm dlx skills add Agentic-Insurance-Foundation/agentic-insurance-protocol --skill agentic-insurance-protocol -g -y
+   ```
+   </CodeGroup>
+
+   Use the package manager that your user has. The skills CLI finds the AI agent that runs it, and installs the skill for that AI agent.
+
+2. Add the AIP registry to your MCP servers, for all the projects of your user. It is a remote MCP server over HTTP, named `aip-registry`, at `https://registry.agenticinsuranceprotocol.org/mcp`. In Claude Code, run:
+
+   ```bash
+   claude mcp add --transport http --scope user aip-registry https://registry.agenticinsuranceprotocol.org/mcp
+   ```
+
+   In another AI agent, add the server to your own MCP configuration.
+
+3. Tell your user what you installed, and ask them to restart you, so that you load the registry tools.
+
+The registry is a test registry with fictional data. The [AIP skill](/0.1/skill) gives the skill and the rules of each country.
+
+## Seller MCP server
+
+1. Install the seller skill in the current project:
+
+   <CodeGroup>
+   ```bash npx
+   npx skills add Agentic-Insurance-Foundation/agentic-insurance-protocol --skill install-aip-seller-mcp -y
+   ```
+
+   ```bash bun
+   bunx skills add Agentic-Insurance-Foundation/agentic-insurance-protocol --skill install-aip-seller-mcp -y
+   ```
+
+   ```bash yarn
+   yarn dlx skills add Agentic-Insurance-Foundation/agentic-insurance-protocol --skill install-aip-seller-mcp -y
+   ```
+
+   ```bash pnpm
+   pnpm dlx skills add Agentic-Insurance-Foundation/agentic-insurance-protocol --skill install-aip-seller-mcp -y
+   ```
+   </CodeGroup>
+
+   Use the package manager that your user has.
+
+2. Read the SKILL.md of `install-aip-seller-mcp` that the skills CLI installed, and do its steps. The skill copies a small Express app with an MCP server, where the five AIP tools are shells. Then you fill each tool with what your user sells. The app runs on Bun. When Bun is missing, ask your user to install it from [bun.sh](https://bun.sh).
+
+The [specification](/0.1/spec) gives each tool.

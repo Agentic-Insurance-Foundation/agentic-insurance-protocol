@@ -1,0 +1,42 @@
+---
+title: "Introduction"
+description: "What the Agentic Insurance Protocol is, why it exists, and where to start."
+---
+
+## What AIP is
+
+AIP defines how an AI agent finds, prices and applies for an insurance product with any seller. The seller keeps the source of each answer, and the customer approves each application on the seller's own page, so that a sale through an AI agent meets the same rules as a sale on the seller's site.
+
+Draft 0.1 covers the sale only. Servicing after the sale comes in a later draft.
+
+AIP is an extension of MCP, which carries every call. It needs no other protocol, and it defines only what is specific to insurance.
+
+Status: **draft 0.1**. A later draft can break this one until 1.0.
+
+Countries: draft 0.1 supports three countries at launch, the United States, the United Kingdom and France. They show the logic on three legal systems. The rules of the customer's country apply, where the customer lives and where the insured good is, whatever the seller's country. The tools and the types do not depend on a country, so a new country needs only its public registers in the [registry](/0.1/registry) and its rules file in the [skill](/0.1/skill). Until then, the AI agent tells the customer that AIP does not support that country yet.
+
+## Why it exists
+
+AI agents now open insurers' websites, fill in the forms and get quotes for people. Insurance is a regulated market. In each country, a regulator decides who may sell, who may advise, which documents the customer reads before they commit and what they must confirm. No rule applies yet to an AI agent that buys insurance, so each insurer answers alone. It can block AI agents, let them in with no rules, or write its own rules. None of these works in a regulated market, because a seller cannot choose the law of its own sales. We think one set of rules should apply to the whole market, and that the regulator of each country should own it. AIP is a first version of these rules, for the market to agree on and for the regulators to take over.
+
+One AI agent serves people in every country, and it can reach a seller's website in any country. It must follow the law of the customer's country, whatever the seller's country. Each seller also exposes a different shape. The MCP servers we looked at for this draft quote with different tool names, different inputs and different flows. An AI agent cannot compare two offers or do the same action twice in the same way.
+
+MCP does not cover what insurance regulation asks for:
+
+- **Right to sell.** Who holds a licence, from which regulator, in which role. This covers the insurer that carries the risk too.
+- **Underwriting scope.** Which risks a product can cover, published before any question, so that an AI agent does not buy cover that cannot apply to the customer.
+- **Pre-contract information.** The IPID and the general conditions must reach the customer before they commit.
+- **Demands and needs.** The seller records them before the contract (IDD art. 20 in France, ICOBS 5.2 in the United Kingdom) and says if it gave advice.
+- **Declaration.** The answers the customer commits to, with the exact questions they answered, where each answer came from, and the customer's approval.
+- **Parties.** Subscriber, insured, beneficiary and payer can be different people.
+- **Withdrawal period** after a distance sale.
+
+## Where to start
+
+| You are | Start with |
+|---|---|
+| A seller or an insurer with an MCP server | The [specification](/0.1/spec), then the [schema reference](/0.1/reference) |
+| A seller that builds its MCP server | The skill and the template in [`skills/install-aip-seller-mcp/`](https://github.com/Agentic-Insurance-Foundation/agentic-insurance-protocol/tree/main/skills/install-aip-seller-mcp). Or tell your AI agent: "Install the AIP seller MCP server from docs.agenticinsuranceprotocol.org/install.md" |
+| A maker of an AI assistant | The [AIP skill](/0.1/skill) |
+| A regulator | The rules of your country: [France](/0.1/skill/fr), the [United Kingdom](/0.1/skill/gb) or the [United States](/0.1/skill/us) |
+| The operator of a registry | The [registry](/0.1/registry), then the [schema reference](/0.1/reference#r1-common-types) |

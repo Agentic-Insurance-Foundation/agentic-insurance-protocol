@@ -1,0 +1,8 @@
+{
+  "status": "complete",
+  "offers": [],
+  "no_offer": {
+    "reason_code": "outside_underwriting_scope",
+    "message": "Essentiel covers pets that live in France. Pixel lives in the United Kingdom."
+  }
+}
