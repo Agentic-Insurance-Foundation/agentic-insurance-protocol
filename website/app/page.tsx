@@ -348,7 +348,7 @@ const AUDIENCES = [
     points: [
       { lead: "Keep the evidence", text: "of each sale: the licence checked, the documents delivered and the declaration that the customer approved." },
       { lead: "Give AI agents the full offer", text: "with its cover, limits, excess and documents, through one set of tools." },
-      { lead: "Choose your level", text: "of AIP, and keep the sensitive questions on your own page." },
+      { lead: "Work with AI agents", text: "under consumer protections agreed up front, with a lower compliance risk than rules set after the fact." },
     ],
   },
   {
@@ -495,8 +495,8 @@ export default function Home() {
         <p className={lede}>
           AI agents already fill in insurers&apos; forms and get quotes for people, outside the rules that every broker and insurer follows. AIP
           proposes one set of rules for the whole market. The AI agent buys only from a seller licensed in the customer&apos;s country and follows
-          that country&apos;s rules, the customer confirms each answer, and each step keeps a proof of who did it. It is a first version, for
-          insurers to agree on and for regulators to own.
+          that country&apos;s rules, the customer confirms each answer, and each step keeps a proof of who did it. It is a first version, a
+          starting point for the industry and regulators to shape together.
         </p>
         <div className={actions}>
           <a className={button({ primary: true })} href={SPEC_HREF}>
@@ -520,16 +520,17 @@ export default function Home() {
           <p>
             Each insurer answers alone. Insurify blocked Muse, then opened a gateway with rules of its own. Kin opened its site to AI agents, and
             Lemonade built its own platform for them. An insurer can block AI agents, let them in with no rules, or write rules of its own, and none
-            of these works in a regulated market. A block turns away every customer who chose an AI agent. An open site takes sales that no rule
-            covers, and rules that each seller writes for itself work as if each broker chose the law of its own sales. With the three side by side
+            of these works in a regulated market. A block turns away customers who chose an AI agent. An open site takes sales without clear
+            consumer protections, which exposes the insurer to complaints and enforcement. Rules that each insurer writes for itself give
+            consumers different protections at each seller, and leave the practical rules to be set after the fact, through enforcement actions. With the three side by side
             in one market, an AI agent meets different rules at each insurer.
           </p>
           <p>
-            We think one set of rules should apply to the whole market, and that the regulator should set them, as it does for brokers and insurers
-            today. So we built the <strong>Agentic Insurance Protocol</strong>, or AIP, a first version for the market to agree on and for the
-            regulators to take over. The regulator of each market decides what an AI agent may do there, advice included, and owns the tests it must
-            pass. Every sale goes through a licensed seller, and the buyer confirms each answer themselves.{" "}
-            <a href="https://personalagentprotocol.org">PAP</a> already tells the seller who the AI agent is, and AIP adds what the law lets it do.
+            We think shared rules, agreed up front, would protect consumers and give carriers more confidence and a lower compliance risk. So we
+            built the <strong>Agentic Insurance Protocol</strong>, or AIP, a first version intended to start that discussion between the industry
+            and regulators. Over time, the regulator of each market could decide what an AI agent may do there, advice included, and own the tests
+            it must pass. In AIP, every sale goes through a licensed seller, and the buyer confirms each key answer themselves. AIP works alongside{" "}
+            <a href="https://personalagentprotocol.org">PAP</a>, which tells the seller who the AI agent is, and adds what the law lets the agent do.
           </p>
         </SectionHead>
         {/* One numbered step per line, then a cell for each fact about it, each under its own label. */}
@@ -577,8 +578,8 @@ export default function Home() {
       <Section id="partners" split>
         <SectionHead title="Launch partners" split>
           <p>
-            AIP is open source. Every participant can contribute, and the goal is that the regulators take ownership of it. The partners meet on an
-            agreed cadence to align the protocol.
+            AIP is open source. Every participant can contribute to the dialogue and to its development, and the goal is that regulators take
+            ownership of it. The launch partners meet on an agreed cadence to discuss how the protocol changes.
           </p>
           <div className={actions}>
             <Link className={button({ primary: true })} href={JOIN_HREF}>
@@ -586,7 +587,13 @@ export default function Home() {
             </Link>
           </div>
         </SectionHead>
-        <div className={placeholder}>Launched with [partner logos]</div>
+        <div>
+          <div className={placeholder}>[partner logos, same size, alphabetical order]</div>
+          <p className={note}>
+            Launch partners support the discussion on common rules for AI agents in insurance. Being listed does not mean an endorsement of the
+            protocol or of any product, a commercial relationship, or a joint launch between the listed organisations.
+          </p>
+        </div>
       </Section>
 
       <Section id="blocks">
@@ -665,7 +672,8 @@ export default function Home() {
           </p>
           <p>
             The first rules files, for the United States, the United Kingdom and France, come from the AIP maintainers, and no lawyer or regulator
-            has reviewed them yet. We ask each regulator to review the file of its country, to change it, and to take it over.
+            has reviewed them yet. We ask each regulator to review the file of its country, to change it, and to take it over, and we
+            invite insurers, technology providers and consumer representatives to comment on it.
           </p>
         </SectionHead>
         <div className={actions}>
